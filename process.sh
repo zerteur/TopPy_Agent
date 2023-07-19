@@ -85,6 +85,34 @@ choose_and_rename_processes() {
         esac
     done
 
+    # Mettre à jour le fichier config.yaml avec les processus sélectionnés et renommés
+    local config_file="config.yaml"
+    local process_names_section="process_names:"
+    local temp_file=$(mktemp)
+
+    # Vérifier si le fichier config.yaml existe
+    if [ -f "$config_file" ]; then
+        # Copier le fichier config.yaml vers un fichier temporaire
+        cp "$config_file" "$temp_file"
+    else
+        # Créer un nouveau fichier temporaire avec la section process_names
+        echo "$process_names_section" > "$temp_file"
+    fi
+
+    # Ajouter les processus sélectionnés et renommés au fichier temporaire
+    for pid in "${!process_names[@]}"; do
+        process_name=$(get_process_name "$pid")
+        rename="${process_names[$pid]}"
+        echo "  - name: \"$process_name\"" >> "$temp_file"
+        echo "    rename: \"$rename\"" >> "$temp_file"
+    done
+
+    # Concaténer le fichier temporaire avec le fichier config.yaml
+    cat "$temp_file" >> "$config_file"
+
+    # Supprimer le fichier temporaire
+    rm "$temp_file"
+
     # Affichage des processus renommés
     echo "Processus renommés :"
     for pid in "${!process_names[@]}"; do
