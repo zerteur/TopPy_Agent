@@ -10,6 +10,10 @@ rename_process() {
     if [[ $choice =~ ^[Oo]$ ]]; then
         read -p "Entrez le nouveau nom pour le processus : " new_name
         process_names["$process_name"]=$new_name
+        echo "Processus renommé avec succès."
+    else
+        process_names["$process_name"]=$process_name
+        echo "Processus ajouté avec succès."
     fi
 }
 
@@ -94,6 +98,7 @@ choose_and_rename_processes() {
 
     # Affichage des process_names renommés
     echo "Processus renommés :"
+    echo "process_names:"
     for process_name in "${!process_names[@]}"; do
         rename="${process_names[$process_name]}"
         echo "  - name: \"$process_name\""
