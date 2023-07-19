@@ -110,8 +110,7 @@ choose_and_rename_processes() {
     # Concaténer le fichier temporaire avec le fichier config.yaml
     cat "$temp_file" >> "$config_file"
 
-    # Supprimer le fichier temporaire
-    rm "$temp_file"
+
 
     # Affichage des processus renommés
     echo "Processus renommés :"
