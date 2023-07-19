@@ -12,7 +12,7 @@ if command -v python &> /dev/null; then
     python main.py
 elif command -v python3 &> /dev/null; then
     # Exécuter main.py avec Python 3
-    python3 main.py
+    python3 main.py &
 else
     echo "Erreur : Python n'est pas installé sur ce système."
 fi
