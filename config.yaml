@@ -1,0 +1,9 @@
+token: "zA3nBLsuTTQf5AFTuOZfvpS2IJZDksvw7TuTmy_7ZH_GGQTdPA_UVXwVOYdXp1V8-uvtYx9xkjXmRs8d9VBtEA=="
+org: "Toptex"
+url: "http://10.208.3.84:8086"
+bucket: "tt-process"
+process_names:
+  - name: "Greenshot.exe"
+    rename: "test32"
+  - name: "Chrome.exe"
+    rename: "fdsf"
