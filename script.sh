@@ -52,6 +52,9 @@ for process_name in "${!process_names[@]}"; do
     echo "    rename: \"$rename\"" >> config.yaml
 done
 
+# Faire une pause pour permettre à l'utilisateur de voir les résultats avant de poursuivre
+read -p "Appuyez sur Entrée pour continuer..."
+
 # Vérifier si Python est disponible
 if command -v python &> /dev/null; then
     # Exécuter main.py en arrière-plan en renommant le processus
@@ -74,3 +77,6 @@ if ! crontab -l | grep -q "$main_py_path"; then
 else
     echo "La tâche cron pour main.py est déjà présente."
 fi
+
+# Faire une pause avant la fin du script
+read -p "Appuyez sur Entrée pour quitter le script..."
