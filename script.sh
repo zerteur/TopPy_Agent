@@ -27,5 +27,11 @@ fi
 # Obtenir le chemin absolu de main.py
 main_py_path=$(realpath main.py)
 
-# Ajouter main.py à la liste des tâches cron
-(crontab -l 2>/dev/null; echo "@reboot python $main_py_path > $(pwd)/output.log 2>&1") | crontab -
+# Vérifier si la tâche cron est déjà présente
+if ! crontab -l | grep -q "$main_py_path"; then
+    # Ajouter main.py à la liste des tâches cron
+    (crontab -l 2>/dev/null; echo "@reboot python $main_py_path > $(pwd)/output.log 2>&1") | crontab -
+    echo "Tâche cron ajoutée pour main.py."
+else
+    echo "La tâche cron pour main.py est déjà présente."
+fi
