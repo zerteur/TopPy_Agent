@@ -26,20 +26,6 @@ get_process_name() {
     echo "$process_name"
 }
 
-# Fonction pour afficher un récapitulatif des processus renommés
-show_summary() {
-    echo "Récapitulatif des processus renommés :"
-    echo "-----------------------------------"
-
-    for process_name in "${!process_names[@]}"; do
-        rename="${process_names[$process_name]}"
-        echo "  - name: \"$process_name\""
-        echo "    rename: \"$rename\""
-    done
-
-    echo "-----------------------------------"
-}
-
 # Fonction pour choisir et renommer les processus
 choose_and_rename_processes() {
     local process_list=$1
@@ -99,38 +85,15 @@ choose_and_rename_processes() {
         esac
     done
 
+    # Affichage des processus renommés
+    echo "Processus renommés :"
+    for pid in "${!process_names[@]}"; do
+        process_name=$(get_process_name "$pid")
+        rename="${process_names[$pid]}"
+        echo "- name: \"$process_name\""
+        echo "  rename: \"$rename\""
+    done
+
     # Retourner le tableau des process_names renommés
-    process_names_ref=("${process_names[@]}")
-}
-
-    # Ajouter les nouveaux process_names renommés au tableau existant dans config.yaml
-    for process_name in "${!process_names[@]}"; do
-        rename="${process_names[$process_name]}"
-
-        if [[ -z ${process_names[$process_name]} ]]; then
-            # Le processus n'a pas été renommé, conserver le nom d'origine
-            process_names["$process_name"]="$process_name"
-        fi
-
-        # Vérifier si le nom du processus existe déjà dans le tableau
-        if [[ " ${!config_process_names[@]} " =~ " $process_name " ]]; then
-            # Le nom du processus existe déjà, supprimer l'ancienne entrée
-            unset "config_process_names[$process_name]"
-        fi
-
-        # Ajouter le processus renommé au tableau
-        config_process_names["$process_name"]=$rename
-    done
-
-    # Mettre à jour le fichier config.yaml avec les process_names renommés
-    echo "process_names:" > config.yaml
-
-    for process_name in "${!config_process_names[@]}"; do
-        rename="${config_process_names[$process_name]}"
-        echo "  - name: \"$process_name\"" >> config.yaml
-        echo "    rename: \"$rename\"" >> config.yaml
-    done
-
-    # Exporter le tableau process_names
     process_names_ref=("${process_names[@]}")
 }
