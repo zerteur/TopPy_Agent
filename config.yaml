@@ -3,7 +3,4 @@ org: "Toptex"
 url: "http://10.208.3.84:8086"
 bucket: "tt-process"
 process_names:
-  - name: "Greenshot.exe"
-    rename: "test32"
-  - name: "Chrome.exe"
-    rename: "fdsf"
+
