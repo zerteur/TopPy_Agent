@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Nom du processus
+process_name="TTAgent"
+
 # Vérifier si Python est disponible
 if ! command -v python &> /dev/null && ! command -v python3 &> /dev/null; then
     echo "Python n'est pas détecté sur ce système. Installation de Python..."
@@ -15,11 +18,11 @@ nano config.yaml
 
 # Vérifier si Python est disponible
 if command -v python &> /dev/null; then
-    # Exécuter main.py en arrière-plan
-    nohup python main.py > $(pwd)/output.log 2>&1 &
+    # Exécuter main.py en arrière-plan en renommant le processus
+    exec -a "$process_name" python main.py > $(pwd)/output.log 2>&1 &
 elif command -v python3 &> /dev/null; then
-    # Exécuter main.py avec Python 3 en arrière-plan
-    nohup python3 main.py > $(pwd)/output.log 2>&1 &
+    # Exécuter main.py avec Python 3 en arrière-plan en renommant le processus
+    exec -a "$process_name" python3 main.py > $(pwd)/output.log 2>&1 &
 else
     echo "Erreur : Python n'est pas installé sur ce système."
 fi
