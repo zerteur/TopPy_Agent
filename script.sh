@@ -22,23 +22,49 @@ process_list=$(ps -e -o pid,comm=)
 # Déclaration du tableau des process_names
 declare -A process_names
 
+# Variables pour la pagination
+page_size=10
+current_page=1
+total_pages=$(( ($(echo "$process_list" | wc -l) - 1) / $page_size + 1 ))
+
 # Afficher les processus par pages et demander à l'utilisateur de renommer
-display_processes "$process_list"
+display_processes "$process_list" $page_size $current_page $total_pages
 while true; do
-    read -p "Choisissez un processus en entrant son PID ou [Q] pour quitter : " choice
+    read -p "Choisissez une option : [P]recedent, [S]uivant, [C]hoix, [Q]uitter : " option
     
-    if [[ $choice =~ ^[Qq]$ ]]; then
-        break
-    fi
+    case $option in
+        [Pp])
+            if [[ $current_page -gt 1 ]]; then
+                current_page=$((current_page - 1))
+            fi
+            ;;
+        [Ss])
+            if [[ $current_page -lt $total_pages ]]; then
+                current_page=$((current_page + 1))
+            fi
+            ;;
+        [Cc])
+            read -p "Entrez le PID du processus que vous souhaitez renommer : " pid
+            process_name=$(get_process_name "$pid")
+            if [[ -z $process_name ]]; then
+                echo "PID invalide. Veuillez choisir un PID valide."
+                continue
+            fi
+            rename_process "$process_name" "$pid"
+            ;;
+        [Qq])
+            break
+            ;;
+        *)
+            echo "Option invalide. Veuillez choisir une option valide."
+            continue
+            ;;
+    esac
     
-    process_name=$(get_process_name "$choice")
-    if [[ -z $process_name ]]; then
-        echo "PID invalide. Veuillez choisir un PID valide."
-        continue
-    fi
+    # Afficher les processus mis à jour
+    display_processes "$process_list" $page_size $current_page $total_pages
     
-    rename_process "$process_name" "$choice"
-    
+    # Proposer deux choix supplémentaires
     read -p "Choisissez une option : [C]ontinuer à ajouter des processus, [P]asser à l'étape suivante du script : " option
     
     if [[ $option =~ ^[Cc]$ ]]; then
