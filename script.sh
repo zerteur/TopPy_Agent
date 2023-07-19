@@ -1,8 +1,5 @@
 #!/bin/bash
 
-# Nom du processus
-process_name="TTAgent"
-
 # Vérifier si Python est disponible
 if ! command -v python &> /dev/null && ! command -v python3 &> /dev/null; then
     echo "Python n'est pas détecté sur ce système. Installation de Python..."
@@ -13,11 +10,11 @@ fi
 # Installer les dépendances
 sudo pip install -r requirements.txt
 
-# Inclure le fichier process.sh
-source "$(dirname "$0")/process.sh"
-
 # Obtenir la liste des processus en cours d'exécution avec leurs PIDs
 process_list=$(ps -e -o pid,comm=)
+
+# Inclure le fichier process.sh
+source "$(dirname "$0")/process.sh"
 
 # Déclaration du tableau des process_names
 declare -A process_names
@@ -27,15 +24,6 @@ choose_and_rename_processes "$process_list" process_names
 
 # Faire une pause pour permettre à l'utilisateur de voir les résultats avant de poursuivre
 read -p "Appuyez sur Entrée pour continuer..."
-
-# Mettre à jour le fichier config.yaml avec les process_names renommés
-echo "process_names:" > config.yaml
-
-for process_name in "${!process_names[@]}"; do
-    rename="${process_names[$process_name]}"
-    echo "  - name: \"$process_name\"" >> config.yaml
-    echo "    rename: \"$rename\"" >> config.yaml
-done
 
 # Faire une pause pour permettre à l'utilisateur de voir les résultats avant de poursuivre
 read -p "Appuyez sur Entrée pour continuer..."
