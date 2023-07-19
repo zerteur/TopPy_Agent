@@ -45,7 +45,7 @@ done <<< "$process_list"
 read -p "Appuyez sur Entrée pour continuer..."
 
 # Mettre à jour le fichier config.yaml avec les process_names renommés
-config_yaml
+config.yaml
 
 # Faire une pause pour permettre à l'utilisateur de voir les résultats avant de poursuivre
 read -p "Appuyez sur Entrée pour continuer..."
