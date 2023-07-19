@@ -43,6 +43,9 @@ while IFS= read -r line; do
     fi
 done <<< "$process_list"
 
+# Faire une pause pour permettre à l'utilisateur de voir les résultats avant de poursuivre
+read -p "Appuyez sur Entrée pour continuer..."
+
 # Mettre à jour le fichier config.yaml avec les process_names renommés
 echo "process_names:" > config.yaml
 
