@@ -22,20 +22,31 @@ select_and_rename_processes() {
         # Obtenir la liste des processus en cours d'exécution avec leurs PIDs
         process_list=$(ps -e -o pid,comm=)
         
+        # Variable pour vérifier si des processus ont été affichés
+        process_displayed=false
+        
         # Parcourir chaque ligne du résultat de ps
         while IFS= read -r line; do
             # Extraire le PID et le nom du processus
             pid=$(echo "$line" | awk '{print $1}')
             process_name=$(echo "$line" | awk '{print $2}')
             
-            # Demander à l'utilisateur de renommer le processus
-            read -p "Voulez-vous renommer le processus '$process_name' (PID: $pid) ? (Oui/Non) " choice
+            # Afficher le processus et demander à l'utilisateur de renommer
+            echo "Processus trouvé : $process_name (PID: $pid)"
+            process_displayed=true
+            
+            read -p "Voulez-vous renommer ce processus ? (Oui/Non) " choice
             
             if [[ $choice =~ ^[Oo]$ ]]; then
                 read -p "Entrez le nouveau nom pour le processus : " new_name
                 process_names["$process_name"]=$new_name
             fi
         done <<< "$process_list"
+        
+        # Vérifier si des processus ont été affichés
+        if [[ $process_displayed = false ]]; then
+            echo "Aucun processus trouvé."
+        fi
         
         # Proposer deux choix supplémentaires
         read -p "Choisissez une option : [C]ontinuer à ajouter des processus, [P]asser à l'étape suivante du script : " option
