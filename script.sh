@@ -14,7 +14,7 @@ fi
 sudo pip install -r requirements.txt
 
 # Inclure le fichier process.sh
-source process.sh
+source "$(dirname "$0")/process.sh"
 
 # Obtenir la liste des processus en cours d'exécution avec leurs PIDs
 process_list=$(ps -e -o pid,comm=)
