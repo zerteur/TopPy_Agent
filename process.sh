@@ -85,33 +85,21 @@ choose_and_rename_processes() {
         esac
     done
 
-    # Retourner le tableau des process_names renommés
-    process_names_ref=("${process_names[@]}")
-}
+    # Mettre à jour le fichier config.yaml avec les processus sélectionnés et renommés
+    local config_file="config.yaml"
+    local process_names_section="process_names:"
+    local temp_file=$(mktemp)
 
-# Obtenir la liste des processus en cours d'exécution avec leurs PIDs
-process_list=$(ps -e -o pid,comm=)
+    # Vérifier si le fichier config.yaml existe
+    if [ -f "$config_file" ]; then
+        # Copier le fichier config.yaml vers un fichier temporaire
+        cp "$config_file" "$temp_file"
+    else
+        # Créer un nouveau fichier temporaire avec la section process_names
+        echo "$process_names_section" > "$temp_file"
+    fi
 
-# Déclaration du tableau des process_names
-declare -A process_names
-
-# Appeler la fonction pour choisir et renommer les processus
-choose_and_rename_processes "$process_list" process_names
-
-# Mettre à jour le fichier config.yaml avec les process_names renommés
-config_file="config.yaml"
-
-# Vérifier si le fichier config.yaml existe
-if [ -f "$config_file" ]; then
-    # Copier le fichier config.yaml vers un fichier temporaire
-    temp_file=$(mktemp)
-    cp "$config_file" "$temp_file"
-
-    # Supprimer les process_names existants du fichier temporaire
-    sed -i '/process_names:/d' "$temp_file"
-
-    # Ajouter les process_names renommés au fichier temporaire
-    echo "process_names:" >> "$temp_file"
+    # Ajouter les processus sélectionnés et renommés au fichier temporaire
     for pid in "${!process_names[@]}"; do
         process_name=$(get_process_name "$pid")
         rename="${process_names[$pid]}"
@@ -119,17 +107,21 @@ if [ -f "$config_file" ]; then
         echo "    rename: \"$rename\"" >> "$temp_file"
     done
 
-    # Remplacer le fichier config.yaml par le fichier temporaire
-    mv "$temp_file" "$config_file"
-else
-    echo "Le fichier config.yaml n'existe pas."
-fi
+    # Concaténer le fichier temporaire avec le fichier config.yaml
+    cat "$temp_file" >> "$config_file"
 
-# Affichage des processus renommés
-echo "Processus renommés :"
-for pid in "${!process_names[@]}"; do
-    process_name=$(get_process_name "$pid")
-    rename="${process_names[$pid]}"
-    echo "- name: \"$process_name\""
-    echo "  rename: \"$rename\""
-done
+    # Supprimer le fichier temporaire
+    rm "$temp_file"
+
+    # Affichage des processus renommés
+    echo "Processus renommés :"
+    for pid in "${!process_names[@]}"; do
+        process_name=$(get_process_name "$pid")
+        rename="${process_names[$pid]}"
+        echo "- name: \"$process_name\""
+        echo "  rename: \"$rename\""
+    done
+
+    # Retourner le tableau des process_names renommés
+    process_names_ref=("${process_names[@]}")
+}
