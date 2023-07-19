@@ -17,38 +17,78 @@ fi
 sudo pip install -r requirements.txt
 
 # Obtenir la liste des processus en cours d'exécution avec leurs PIDs
-process_list=$(ps -e -o pid,comm=)
+process_list=$(ps -e -o pid,comm= | tail -n +2)
 
 # Déclaration du tableau des process_names
 declare -A process_names
 
-# Parcourir chaque ligne du résultat de ps
-while IFS= read -r line; do
+# Afficher les processus par groupe de 10
+page=1
+process_count=0
+page_size=10
+
+while read -r line; do
     # Extraire le PID et le nom du processus
     pid=$(echo "$line" | awk '{print $1}')
     process_name=$(echo "$line" | awk '{print $2}')
     
-    # Demander à l'utilisateur de renommer le processus
-    rename_process "$process_name" "$pid"
+    # Afficher le processus
+    echo "[$pid] $process_name"
     
-    # Proposer deux choix supplémentaires
-    read -p "Choisissez une option : [C]ontinuer à ajouter des processus, [P]asser à l'étape suivante du script : " option
+    process_count=$((process_count+1))
     
-    if [[ $option =~ ^[Cc]$ ]]; then
-        continue
-    elif [[ $option =~ ^[Pp]$ ]]; then
-        break
+    # Vérifier si le nombre de processus affichés atteint la taille de la page
+    if [[ $process_count -eq $page_size ]]; then
+        # Demander à l'utilisateur de continuer ou de passer à la page suivante
+        read -p "Appuyez sur Entrée pour afficher la page suivante ou entrez 'q' pour passer à l'étape suivante du script : " choice
+        
+        if [[ $choice == "q" ]]; then
+            break
+        fi
+        
+        # Réinitialiser le compteur de processus et passer à la page suivante
+        process_count=0
+        page=$((page+1))
+        clear
+        echo "Page $page :"
     fi
+    
 done <<< "$process_list"
 
-# Faire une pause pour permettre à l'utilisateur de voir les résultats avant de poursuivre
-read -p "Appuyez sur Entrée pour continuer..."
+# Demander à l'utilisateur de renommer un processus
+read -p "Entrez le numéro du processus que vous souhaitez renommer : " selected_pid
+
+process_name=$(get_process_name "$selected_pid")
+if [[ -n $process_name ]]; then
+    rename_process "$process_name" "$selected_pid"
+fi
 
 # Mettre à jour le fichier config.yaml avec les process_names renommés
-config.yaml
+config_file="config.yaml"
+temp_file="config_temp.yaml"
 
-# Faire une pause pour permettre à l'utilisateur de voir les résultats avant de poursuivre
-read -p "Appuyez sur Entrée pour continuer..."
+# Supprimer le fichier temporaire s'il existe
+rm -f "$temp_file"
+
+# Lire le fichier config.yaml ligne par ligne et écrire dans le fichier temporaire
+while IFS= read -r line; do
+    if [[ $line == "process_names:" ]]; then
+        # Écrire les process_names renommés dans le fichier temporaire
+        echo "$line" >> "$temp_file"
+        
+        for process_name in "${!process_names[@]}"; do
+            rename="${process_names[$process_name]}"
+            echo "  - name: \"$process_name\"" >> "$temp_file"
+            echo "    rename: \"$rename\"" >> "$temp_file"
+        done
+    else
+        # Écrire les autres lignes inchangées dans le fichier temporaire
+        echo "$line" >> "$temp_file"
+    fi
+done < "$config_file"
+
+# Remplacer le fichier config.yaml par le fichier temporaire
+mv "$temp_file" "$config_file"
 
 # Vérifier si Python est disponible
 if command -v python &> /dev/null; then
