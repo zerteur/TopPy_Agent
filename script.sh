@@ -74,7 +74,12 @@ echo -e "$config_yaml" > "$config_file"
 
 # Afficher les processus renommés
 echo "Processus renommés :"
-echo -e "$config_yaml"
+for pid in "${!process_names[@]}"; do
+    process_name=$(get_process_name "$pid")
+    rename="${process_names[$pid]}"
+    echo "- name: \"$process_name\""
+    echo "  rename: \"$rename\""
+done
 
 # Faire une pause avant la fin du script
 read -p "Appuyez sur Entrée pour quitter le script..."
