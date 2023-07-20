@@ -55,3 +55,17 @@ choose_and_rename_processes() {
                 if (( current_page < total_pages )); then
                     (( current_page++ ))
                 fi
+                ;;
+            Q)
+                # Quitter
+                break
+                ;;
+            *)
+                echo "Option invalide. Veuillez réessayer."
+                ;;
+        esac
+    done
+
+    # Retourner le tableau des process_names renommés
+    process_names_ref=("${process_names[@]}")
+}
