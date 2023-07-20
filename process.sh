@@ -108,7 +108,7 @@ choose_and_rename_processes() {
     done
 
     # Concaténer le fichier temporaire avec le fichier config.yaml
-    cat "$temp_file" >> "$config_file"
+    touch "$temp_file"
 
 
 
