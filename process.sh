@@ -35,7 +35,7 @@ choose_and_rename_processes() {
     declare -A process_names
 
     # Paramètres pour la pagination des processus
-    local page_size=35
+    local page_size=45
     local current_page=1
     local total_pages=$(( ( $(ps -e -o pid= | wc -l) - 1) / page_size + 1))
 
