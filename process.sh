@@ -26,29 +26,6 @@ get_process_name() {
     echo "$process_name"
 }
 
-# Fonction pour renommer un processus
-rename_process() {
-    local pid=$1
-    local process_names_ref=$2
-
-    # Récupérer le nom actuel du processus
-    local process_name=$(get_process_name "$pid")
-
-    # Vérifier si le processus existe dans le tableau des processus renommés
-    if [[ ${process_names_ref[$process_name]+_} ]]; then
-        read -p "Voulez-vous renommer le processus '$process_name' (PID: $pid) ? (Oui/Non) " choice
-        if [[ $choice =~ ^[Oo]$ ]]; then
-            read -p "Entrez le nouveau nom pour le processus : " new_name
-            process_names_ref["$process_name"]=$new_name
-            echo "Le processus '$process_name' (PID: $pid) a été renommé en '$new_name'."
-        else
-            echo "Le processus '$process_name' (PID: $pid) ne sera pas renommé."
-        fi
-    else
-        echo "Le processus '$process_name' (PID: $pid) ne fait pas partie des processus sélectionnés."
-    fi
-}
-
 # Fonction pour choisir et renommer les processus
 choose_and_rename_processes() {
     local process_list=$1
@@ -74,7 +51,16 @@ choose_and_rename_processes() {
             C)
                 # Choix d'un processus
                 read -p "Entrez le PID du processus que vous souhaitez renommer : " pid
-                rename_process "$pid" process_names_ref
+                process_name=$(get_process_name "$pid")
+
+                read -p "Voulez-vous renommer le processus '$process_name' (PID: $pid) ? (O/N) " choice
+                if [[ $choice =~ ^[Oo]$ ]]; then
+                    read -p "Entrez le nouveau nom pour le processus : " new_name
+                    process_names["$pid"]=$new_name
+                    echo "Le processus '$process_name' (PID: $pid) a été renommé en '$new_name'."
+                else
+                    echo "Le processus '$process_name' (PID: $pid) ne sera pas renommé."
+                fi
                 ;;
 
             P)
@@ -99,48 +85,42 @@ choose_and_rename_processes() {
         esac
     done
 
-    # Retourner le tableau des process_names renommés
-    process_names_ref=("${process_names[@]}")
-}
+    # Mettre à jour le fichier config.yaml avec les processus sélectionnés et renommés
+    local config_file="config.yaml"
+    local process_names_section="process_names:"
+    local temp_file=$(mktemp)
 
-# Utilisation de la fonction choose_and_rename_processes pour renommer les processus
-process_list=$(ps -e -o pid,comm=)
-declare -A process_names
-choose_and_rename_processes "$process_list" process_names
+    # Vérifier si le fichier config.yaml existe
+    if [ -f "$config_file" ]; then
+        # Copier le fichier config.yaml vers un fichier temporaire
+        cp "$config_file" "$temp_file"
+    else
+        # Créer un nouveau fichier temporaire avec la section process_names
+        echo "$process_names_section" > "$temp_file"
+    fi
 
-# Mettre à jour le fichier config.yaml avec les processus sélectionnés et renommés
-config_file="config.yaml"
-temp_file=$(mktemp)
+    # Ajouter les processus sélectionnés et renommés au fichier temporaire
+    for pid in "${!process_names[@]}"; do
+        process_name=$(get_process_name "$pid")
+        rename="${process_names[$pid]}"
+        echo "  - name: \"$process_name\"" >> "$temp_file"
+        echo "    rename: \"$rename\"" >> "$temp_file"
+    done
 
-# Vérifier si le fichier config.yaml existe
-if [ -f "$config_file" ]; then
-    # Copier le fichier config.yaml vers un fichier temporaire
-    cp "$config_file" "$temp_file"
-else
-    # Créer un nouveau fichier temporaire avec la section process_names
-    echo "process_names:" > "$temp_file"
-fi
+    # Concaténer le fichier temporaire avec le fichier config.yaml
+    cat "$temp_file" >> "$config_file"
 
-# Ajouter les processus sélectionnés et renommés au fichier temporaire
-for process_name in "${!process_names[@]}"; do
-    rename="${process_names[$process_name]}"
-    echo "  - name: \"$process_name\"" >> "$temp_file"
-    echo "    rename: \"$rename\"" >> "$temp_file"
-done
+    # Supprimer le fichier temporaire
+    rm "$temp_file"
 
-# Concaténer le fichier temporaire avec le fichier config.yaml
-cat "$temp_file" > "$config_file"
-
-# Supprimer le fichier temporaire
-rm "$temp_file"
-
-# Affichage des processus renommés
-echo "Processus renommés :"
-for process_name in "${!process_names[@]}"; do
-    rename="${process_names[$process_name]}"
-    echo "- name: \"$process_name\""
-    echo "  rename: \"$rename\""
-done
+    # Affichage des processus renommés
+    echo "Processus renommés :"
+    for pid in "${!process_names[@]}"; do
+        process_name=$(get_process_name "$pid")
+        rename="${process_names[$pid]}"
+        echo "- name: \"$process_name\""
+        echo "  rename: \"$rename\""
+    done
 
     # Retourner le tableau des process_names renommés
     process_names_ref=("${process_names[@]}")
