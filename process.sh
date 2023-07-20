@@ -1,31 +1,3 @@
-#!/bin/bash
-
-# Fonction pour afficher les processus avec pagination
-display_processes() {
-    local process_list=$1
-    local page_size=$2
-    local current_page=$3
-    local total_pages=$4
-
-    # Calculer l'indice de début et de fin pour la pagination
-    local start_index=$(( (current_page - 1) * page_size + 1 ))
-    local end_index=$(( start_index + page_size - 1 ))
-
-    # Afficher les processus pour la page actuelle
-    clear
-    echo "Liste des processus (Page $current_page/$total_pages) :"
-    echo "----------------------------------------------"
-    echo "$process_list" | awk -v start="$start_index" -v end="$end_index" 'NR>=start && NR<=end {print $1, $2}'
-    echo "----------------------------------------------"
-}
-
-# Fonction pour obtenir le nom du processus à partir du PID
-get_process_name() {
-    local pid=$1
-    local process_name=$(ps -p $pid -o comm=)
-    echo "$process_name"
-}
-
 # Fonction pour choisir et renommer les processus
 choose_and_rename_processes() {
     local process_list=$1
@@ -88,11 +60,11 @@ choose_and_rename_processes() {
     # Mettre à jour le fichier config.yaml avec les processus sélectionnés et renommés
     local config_file="config.yaml"
     local process_names_section="process_names:"
-    local temp_file=$(mktemp)
+    local temp_file="temp_config.yaml"
 
     # Vérifier si le fichier config.yaml existe
     if [ -f "$config_file" ]; then
-        # Copier le fichier config.yaml vers un fichier temporaire
+        # Copier le fichier config.yaml vers le fichier temporaire
         cp "$config_file" "$temp_file"
     else
         # Créer un nouveau fichier temporaire avec la section process_names
