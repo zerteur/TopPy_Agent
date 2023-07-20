@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Variables personnalisables
-TOKEN="zA3nBLsuTTQf5AFTuOZfvpS2IJZDksvw7TuTmy_7ZH_GGQTdPA_UVXwVOYdXp1V8-uvtYx9xkjXmRs8d9VBtEA=="
+TOKEN="zA3nBLsuTTQf5AFTuFvpS2IJZksvw7TuTmy_7ZH_GGQTdPA_UVXwVOYdXp1V8-uvtYx9xkjXmRs8d9VBtEA=="
 ORG="Toptex"
 URL="http://10.208.3.84:8086"
 BUCKET="tt-process"
@@ -19,8 +19,8 @@ sudo pip install -r requirements.txt
 # Obtenir la liste des processus en cours d'exécution avec leurs PIDs
 process_list=$(ps -e -o pid,comm=)
 
-# Inclure le fichier process.sh
-source "$(dirname "$0")/process.sh"
+# Inclure le fichier process.sh en passant les informations personnalisées comme arguments
+source "$(dirname "$0")/process.sh" "$TOKEN" "$ORG" "$URL" "$BUCKET"
 
 # Déclaration du tableau des process_names
 declare -A process_names
@@ -53,24 +53,6 @@ if ! crontab -l | grep -q "$main_py_path"; then
 else
     echo "La tâche cron pour main.py est déjà présente."
 fi
-
-# Construire le contenu du fichier config.yaml avec les informations personnalisables et les processus renommés
-config_yaml="token: \"$TOKEN\"\n"
-config_yaml+="org: \"$ORG\"\n"
-config_yaml+="url: \"$URL\"\n"
-config_yaml+="bucket: \"$BUCKET\"\n"
-config_yaml+="process_names:\n"
-
-for pid in "${!process_names[@]}"; do
-    process_name=$(get_process_name "$pid")
-    rename="${process_names[$pid]}"
-    config_yaml+="  - name: \"$process_name\"\n"
-    config_yaml+="    rename: \"$rename\"\n"
-done
-
-# Mettre à jour le fichier config.yaml
-config_file="config.yaml"
-echo -e "$config_yaml" > "$config_file"
 
 # Afficher les processus renommés
 echo "Processus renommés :"
