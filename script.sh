@@ -1,11 +1,21 @@
 #!/bin/bash
 
-# Vérifier si Python est disponible
-if ! command -v python &> /dev/null && ! command -v python3 &> /dev/null; then
-    echo "Python n'est pas détecté sur ce système. Installation de Python..."
-    sudo apt-get update
-    sudo apt-get install -y python3
-fi
+# Fonction pour vérifier si Python est installé et installer pip si nécessaire
+install_python_and_pip() {
+    if ! command -v python3 &> /dev/null; then
+        echo "Python n'est pas détecté sur ce système. Installation de Python..."
+        sudo apt-get update
+        sudo apt-get install -y python3
+    fi
+
+    if ! command -v pip &> /dev/null; then
+        echo "pip n'est pas détecté sur ce système. Installation de pip..."
+        sudo apt-get install -y python3-pip
+    fi
+}
+
+# Installer Python et pip si nécessaire
+install_python_and_pip
 
 # Installer les dépendances
 sudo pip install -r requirements.txt
