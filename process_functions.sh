@@ -32,6 +32,13 @@ choose_and_rename_processes() {
             C)
                 # Choix d'un processus
                 read -p "Entrez le PID du processus que vous souhaitez renommer : " pid
+
+                # Vérifier si le PID est valide
+                if ! ps -p "$pid" >/dev/null 2>&1; then
+                    echo "Erreur : Le processus avec le PID $pid n'existe pas."
+                    continue
+                fi
+
                 process_name=$(get_process_name "$pid")
 
                 read -p "Voulez-vous renommer le processus '$process_name' (PID: $pid) ? (O/N) " choice
