@@ -67,13 +67,11 @@ choose_and_rename_processes() {
                 read -p "Entrez le PID du processus que vous souhaitez renommer : " pid
                 process_name=$(get_process_name "$pid")
 
-                read -p "Voulez-vous renommer le processus '$process_name' (PID: $pid) ? (O/N) " choice
+                
                 if [[ $choice =~ ^[Oo]$ ]]; then
                     read -p "Entrez le nouveau nom pour le processus : " new_name
                     process_names["$pid"]=$new_name
                     echo "Le processus '$process_name' (PID: $pid) a été renommé en '$new_name'."
-                else
-                    echo "Le processus '$process_name' (PID: $pid) ne sera pas renommé."
                 fi
                 ;;
 
