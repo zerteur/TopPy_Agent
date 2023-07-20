@@ -35,7 +35,7 @@ choose_and_rename_processes() {
 
                 # Vérifier si le PID est valide
                 if ! ps -p "$pid" >/dev/null 2>&1; then
-                    echo "Erreur : Le processus avec le PID $pid n'existe pas."
+                    echo "Erreur : Le processus avec le PID $pid n'existe pas ou a déjà été terminé."
                     continue
                 fi
 
