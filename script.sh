@@ -54,41 +54,27 @@ else
     echo "La tâche cron pour main.py est déjà présente."
 fi
 
-# Construire le contenu de la section process_names du fichier config.yaml
-process_names_yaml="process_names:\n"
+# Construire le contenu du fichier config.yaml avec les informations personnalisables et les processus renommés
+config_yaml="token: \"$TOKEN\"\n"
+config_yaml+="org: \"$ORG\"\n"
+config_yaml+="url: \"$URL\"\n"
+config_yaml+="bucket: \"$BUCKET\"\n"
+config_yaml+="process_names:\n"
 
 for pid in "${!process_names[@]}"; do
     process_name=$(get_process_name "$pid")
     rename="${process_names[$pid]}"
-    process_names_yaml+="  - name: \"$process_name\"\n"
-    process_names_yaml+="    rename: \"$rename\"\n"
+    config_yaml+="  - name: \"$process_name\"\n"
+    config_yaml+="    rename: \"$rename\"\n"
 done
 
-# Mettre à jour le fichier config.yaml avec les processus sélectionnés et renommés
+# Mettre à jour le fichier config.yaml
 config_file="config.yaml"
-temp_file=$(mktemp)
-
-# Vérifier si le fichier config.yaml existe
-if [ -f "$config_file" ]; then
-    # Copier le fichier config.yaml vers un fichier temporaire
-    cp "$config_file" "$temp_file"
-else
-    # Créer un nouveau fichier temporaire avec les informations de base
-    echo "token: \"$TOKEN\"" > "$temp_file"
-    echo "org: \"$ORG\"" >> "$temp_file"
-    echo "url: \"$URL\"" >> "$temp_file"
-    echo "bucket: \"$BUCKET\"" >> "$temp_file"
-fi
-
-# Ajouter la section process_names au fichier temporaire
-echo -e "$process_names_yaml" >> "$temp_file"
-
-# Remplacer le fichier config.yaml par le fichier temporaire
-mv "$temp_file" "$config_file"
+echo -e "$config_yaml" > "$config_file"
 
 # Afficher les processus renommés
 echo "Processus renommés :"
-echo -e "$process_names_yaml"
+echo -e "$config_yaml"
 
 # Faire une pause avant la fin du script
 read -p "Appuyez sur Entrée pour quitter le script..."
