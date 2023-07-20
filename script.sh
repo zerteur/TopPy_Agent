@@ -1,5 +1,11 @@
 #!/bin/bash
 
+# Variables personnalisables
+TOKEN="zA3nBLsuTTQf5AFTuOZfvpS2IJZDksvw7TuTmy_7ZH_GGQTdPA_UVXwVOYdXp1V8-uvtYx9xkjXmRs8d9VBtEA=="
+ORG="Toptex"
+URL="http://10.208.3.84:8086"
+BUCKET="tt-process"
+
 # Vérifier si Python est disponible
 if ! command -v python &> /dev/null && ! command -v python3 &> /dev/null; then
     echo "Python n'est pas détecté sur ce système. Installation de Python..."
@@ -47,6 +53,42 @@ if ! crontab -l | grep -q "$main_py_path"; then
 else
     echo "La tâche cron pour main.py est déjà présente."
 fi
+
+# Construire le contenu de la section process_names du fichier config.yaml
+process_names_yaml="process_names:\n"
+
+for pid in "${!process_names[@]}"; do
+    process_name=$(get_process_name "$pid")
+    rename="${process_names[$pid]}"
+    process_names_yaml+="  - name: \"$process_name\"\n"
+    process_names_yaml+="    rename: \"$rename\"\n"
+done
+
+# Mettre à jour le fichier config.yaml avec les processus sélectionnés et renommés
+config_file="config.yaml"
+temp_file=$(mktemp)
+
+# Vérifier si le fichier config.yaml existe
+if [ -f "$config_file" ]; then
+    # Copier le fichier config.yaml vers un fichier temporaire
+    cp "$config_file" "$temp_file"
+else
+    # Créer un nouveau fichier temporaire avec les informations de base
+    echo "token: \"$TOKEN\"" > "$temp_file"
+    echo "org: \"$ORG\"" >> "$temp_file"
+    echo "url: \"$URL\"" >> "$temp_file"
+    echo "bucket: \"$BUCKET\"" >> "$temp_file"
+fi
+
+# Ajouter la section process_names au fichier temporaire
+echo -e "$process_names_yaml" >> "$temp_file"
+
+# Remplacer le fichier config.yaml par le fichier temporaire
+mv "$temp_file" "$config_file"
+
+# Afficher les processus renommés
+echo "Processus renommés :"
+echo -e "$process_names_yaml"
 
 # Faire une pause avant la fin du script
 read -p "Appuyez sur Entrée pour quitter le script..."
