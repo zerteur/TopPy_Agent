@@ -35,9 +35,6 @@ choose_and_rename_processes "$process_list" process_names
 # Faire une pause pour permettre à l'utilisateur de voir les résultats avant de poursuivre
 read -p "Appuyez sur Entrée pour continuer..."
 
-# Faire une pause pour permettre à l'utilisateur de voir les résultats avant de poursuivre
-read -p "Appuyez sur Entrée pour continuer..."
-
 # Vérifier si Python est disponible
 if command -v python &> /dev/null; then
     # Exécuter main.py en arrière-plan en renommant le processus
